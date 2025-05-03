@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Data - Retail Analytics Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container">
+      <nav class="nav" style="margin-bottom: 2rem;">
+        <a href="/dashboard/" class="nav-link">
+          ← Back to Dashboard
+        </a>
+      </nav>
+
+      <div class="card">
+        <h1 style="color: var(--primary); font-size: 2rem; margin-bottom: 2rem;">Upload Dataset</h1>
+        
+        <form
+          action="{{ url_for('upload') }}"
+          method="POST"
+          enctype="multipart/form-data"
+          class="form-group"
+        >
+          <div class="form-group">
+            <label class="form-label">Select Table</label>
+            <select name="table_name" required class="form-input">
+              <option value="" disabled selected>Choose a table...</option>
+              <option value="households">Households</option>
+              <option value="transactions">Transactions</option>
+              <option value="products">Products</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Upload CSV File</label>
+            <input 
+              type="file" 
+              name="file" 
+              required 
+              class="form-input"
+              accept=".csv"
+              style="padding: 0.375rem 0;"
+            />
+            <p style="color: var(--secondary); font-size: 0.875rem; margin-top: 0.5rem;">
+              Supported format: CSV
+            </p>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+            Upload Dataset
+          </button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

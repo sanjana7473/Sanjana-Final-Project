@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Household Data - Retail Analytics Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+      .table-container {
+        overflow-x: auto;
+        margin-top: 1rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+      }
+      th, td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      th {
+        background-color: #f8fafc;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      th:hover {
+        background-color: #f1f5f9;
+      }
+      tr:hover {
+        background-color: #f8fafc;
+      }
+      .sort-icon {
+        display: inline-block;
+        width: 0;
+        height: 0;
+        margin-left: 0.5rem;
+        vertical-align: middle;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+      }
+      .sort-asc .sort-icon {
+        border-bottom: 4px solid var(--primary);
+      }
+      .sort-desc .sort-icon {
+        border-top: 4px solid var(--primary);
+      }
+      .filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+      }
+      .filter-group {
+        flex: 1;
+        min-width: 200px;
+      }
+      .filter-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text);
+      }
+      .filter-select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.375rem;
+        background-color: white;
+        font-family: inherit;
+      }
+      .graphs-container {
+        margin-top: 2rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+      }
+      .graph-card {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="nav" style="margin-bottom: 2rem;">
+        <a href="/dashboard/" class="nav-link">← Back to Dashboard</a>
+      </nav>
+
+      <div class="card">
+        <h1 style="color: var(--primary); font-size: 2rem; margin-bottom: 2rem;">Household Transaction Data</h1>
+        
+        <div class="filters">
+          <div class="filter-group">
+            <label class="filter-label">Sort By</label>
+            <select id="sortField" class="filter-select">
+              <option value="hshd_num">Household Number</option>
+              <option value="basket_num">Basket Number</option>
+              <option value="purchase_date">Date</option>
+              <option value="product_num">Product Number</option>
+              <option value="department">Department</option>
+              <option value="commodity">Commodity</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Sort Order</label>
+            <select id="sortOrder" class="filter-select">
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th data-sort="hshd_num">Household Number<span class="sort-icon"></span></th>
+                <th data-sort="basket_num">Basket Number<span class="sort-icon"></span></th>
+                <th data-sort="purchase_date">Date<span class="sort-icon"></span></th>
+                <th data-sort="product_num">Product Number<span class="sort-icon"></span></th>
+                <th data-sort="department">Department<span class="sort-icon"></span></th>
+                <th data-sort="commodity">Commodity<span class="sort-icon"></span></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in data %}
+              <tr>
+                <td>{{ row.hshd_num }}</td>
+                <td>{{ row.basket_num }}</td>
+                <td>{{ row.purchase_date }}</td>
+                <td>{{ row.product_num }}</td>
+                <td>{{ row.department }}</td>
+                <td>{{ row.commodity }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="graphs-container">
+      <div class="graph-card">
+        <div id="spendingTrend"></div>
+      </div>
+      <div class="graph-card">
+        <div id="commodityDistribution"></div>
+      </div>
+    </div>
+
+    <script>
+      // Initialize graphs
+      function initializeGraphs(data) {
+        // Spending Trend Graph
+        const spendingData = {
+          x: data.map(row => row.purchase_date),
+          y: data.map(row => row.spend || 0),
+          type: 'scatter',
+          mode: 'lines+markers',
+          name: 'Spending',
+          line: { color: 'var(--primary)' }
+        };
+
+        const spendingLayout = {
+          title: 'Spending Trend',
+          xaxis: { title: 'Date' },
+          yaxis: { title: 'Spend Amount ($)' },
+          font: { family: 'Inter, sans-serif' },
+          plot_bgcolor: 'white',
+          paper_bgcolor: 'white'
+        };
+
+        Plotly.newPlot('spendingTrend', [spendingData], spendingLayout);
+
+        // Commodity Distribution Graph
+        const commodityCounts = {};
+        data.forEach(row => {
+          commodityCounts[row.commodity] = (commodityCounts[row.commodity] || 0) + 1;
+        });
+
+        const commodityData = {
+          x: Object.keys(commodityCounts),
+          y: Object.values(commodityCounts),
+          type: 'bar',
+          marker: { color: 'var(--primary)' }
+        };
+
+        const commodityLayout = {
+          title: 'Commodity Distribution',
+          xaxis: { title: 'Commodity' },
+          yaxis: { title: 'Count' },
+          font: { family: 'Inter, sans-serif' },
+          plot_bgcolor: 'white',
+          paper_bgcolor: 'white'
+        };
+
+        Plotly.newPlot('commodityDistribution', [commodityData], commodityLayout);
+      }
+
+      // Sort and update table data
+      function sortData() {
+        const sortField = document.getElementById('sortField').value;
+        const sortOrder = document.getElementById('sortOrder').value;
+        
+        const rows = Array.from(document.querySelectorAll('tbody tr'));
+        const data = rows.map(row => {
+          const cells = row.querySelectorAll('td');
+          return {
+            element: row,
+            hshd_num: cells[0].textContent,
+            basket_num: cells[1].textContent,
+            purchase_date: cells[2].textContent,
+            product_num: cells[3].textContent,
+            department: cells[4].textContent,
+            commodity: cells[5].textContent,
+            spend: parseFloat(cells[6]?.textContent || '0')
+          };
+        });
+
+        data.sort((a, b) => {
+          let comparison = 0;
+          if (a[sortField] < b[sortField]) comparison = -1;
+          if (a[sortField] > b[sortField]) comparison = 1;
+          return sortOrder === 'asc' ? comparison : -comparison;
+        });
+
+        const tbody = document.querySelector('tbody');
+        data.forEach(row => tbody.appendChild(row.element));
+
+        // Update graphs with sorted data
+        initializeGraphs(data);
+      }
+
+      // Event listeners
+      document.getElementById('sortField').addEventListener('change', sortData);
+      document.getElementById('sortOrder').addEventListener('change', sortData);
+
+      // Initialize graphs with current data
+      const initialData = Array.from(document.querySelectorAll('tbody tr')).map(row => {
+        const cells = row.querySelectorAll('td');
+        return {
+          hshd_num: cells[0].textContent,
+          basket_num: cells[1].textContent,
+          purchase_date: cells[2].textContent,
+          product_num: cells[3].textContent,
+          department: cells[4].textContent,
+          commodity: cells[5].textContent,
+          spend: parseFloat(cells[6]?.textContent || '0')
+        };
+      });
+      initializeGraphs(initialData);
+
+      // Handle table header clicks
+      document.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+          const column = th.dataset.sort;
+          const currentOrder = th.classList.contains('sort-asc') ? 'desc' : 'asc';
+          
+          // Remove sort classes from all headers
+          document.querySelectorAll('th').forEach(header => {
+            header.classList.remove('sort-asc', 'sort-desc');
+          });
+          
+          // Add sort class to clicked header
+          th.classList.add(`sort-${currentOrder}`);
+          
+          // Redirect with sort parameters
+          window.location.href = `?sort=${column}&order=${currentOrder}`;
+        });
+      });
+    </script>
+  </body>
+</html>

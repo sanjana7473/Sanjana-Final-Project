@@ -1,0 +1,12 @@
+{
+    "avg_clv": "$100.98",
+    "median_clv": "$78.47",
+    "max_clv": "$473.54",
+    "total_customer_value": "$28,881.00",
+    "high_value_customers": "72 (25.2%)",
+    "mse": "436.32",
+    "rmse": "20.89",
+    "mae": "10.38",
+    "r2_score": "0.93",
+    "generated_at": "2025-05-03 16:49:09"
+}

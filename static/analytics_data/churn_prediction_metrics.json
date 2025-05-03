@@ -1,0 +1,12 @@
+{
+    "churn_rate": "33.1%",
+    "at_risk_households": "95",
+    "total_households": "287",
+    "retention_rate": "66.9%",
+    "model_precision": "82.6%",
+    "model_recall": "100.0%",
+    "model_f1": "90.5%",
+    "model_auc": "0.99",
+    "top_churn_indicators": "spend_month_8, spend_month_7, freq_month_7, freq_month_8, spend_month_1",
+    "generated_at": "2025-05-03 16:49:03"
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search Households - Retail Analytics Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container">
+      <nav class="nav" style="margin-bottom: 2rem;">
+        <a href="/dashboard/" class="nav-link">
+          ← Back to Dashboard
+        </a>
+      </nav>
+
+      <div class="card">
+        <h1 style="color: var(--primary); font-size: 2rem; margin-bottom: 2rem;">Search Household Data</h1>
+        
+        <form action="{{ url_for('search') }}" method="POST" class="form-group">
+          <div class="form-group">
+            <label class="form-label">Household Number</label>
+            <input 
+              type="text" 
+              name="hshd_num" 
+              required 
+              class="form-input"
+              placeholder="Enter household number"
+            />
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+            Search Records
+          </button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
