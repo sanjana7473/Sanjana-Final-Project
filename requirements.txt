@@ -6,3 +6,4 @@ pymysql
 scikit-learn
 flask
 dash
+gunicorn
