@@ -1,0 +1,8 @@
+pandas
+matplotlib
+seaborn
+sqlalchemy
+pymysql
+scikit-learn
+flask
+dash
